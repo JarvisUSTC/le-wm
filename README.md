@@ -125,3 +125,43 @@ The returned module is in `eval` mode with its PyTorch weights accessible via `.
 
 ## Contact & Contributions
 Feel free to open [issues](https://github.com/lucas-maes/le-wm/issues)! For questions or collaborations, please contact `lucas.maes@mila.quebec`
+
+
+## Decision-Sufficient Latent Extension (DS-LeWM)
+
+This repository now includes an experimental extension to test the claim that
+"latent physics is necessary but not sufficient for decision-making".
+
+New files are under `decision/`:
+- `train_ds.py`: train LeWM + decision heads (inverse-action, reward, value)
+- `eval_ds.py`: run decision-sufficiency diagnostics over one or more checkpoints
+- `probe.py`, `metrics.py`, `analyze_latent.py`: latent extraction + probe utilities
+
+### Train DS-LeWM
+```bash
+python decision/train_ds.py --config-name=lewm_ds data=pusht
+```
+
+### Reproduce core comparison runs
+```bash
+# baseline LeWM
+python train.py data=pusht output_model_name=lewm
+
+# ablation without SIGReg
+python train.py data=pusht loss.sigreg.weight=0.0 output_model_name=lewm_nosig
+
+# DS-LeWM
+python decision/train_ds.py --config-name=lewm_ds data=pusht output_model_name=lewm_ds
+```
+
+### Evaluate control performance (MPC/CEM)
+```bash
+python eval.py --config-name=pusht.yaml policy=pusht/lewm
+python eval.py --config-name=pusht.yaml policy=pusht/lewm_ds
+python eval.py --config-name=pusht.yaml policy=pusht/lewm_nosig
+```
+
+### Evaluate decision-sufficiency probes
+```bash
+python decision/eval_ds.py --ckpts pusht/lewm pusht/lewm_nosig pusht/lewm_ds --dataset pusht_expert_train
+```
