@@ -1,0 +1,6 @@
+defaults:
+  - pusht
+  - _self_
+
+output:
+  filename: pusht_ds_results.txt
